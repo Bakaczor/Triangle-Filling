@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
-    QPointer<SceneManager> manager = new SceneManager();
+    QPointer<SceneManager> manager = new SceneManager(nullptr, &app);
     QPointer<ImageProvider> provider = new ImageProvider(manager->image);
 
     QQmlApplicationEngine engine;

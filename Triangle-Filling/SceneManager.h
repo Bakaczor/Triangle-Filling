@@ -3,6 +3,7 @@
 #include <QObject>
 #include <QSharedPointer>
 #include <QImage>
+#include <QMutex>
 
 #include "Triangle.h"
 
@@ -24,10 +25,10 @@ class SceneManager : public QObject
         QList<Triangle> triangles;
         uint selectedIdx;
 
-        explicit SceneManager(QObject* parent = nullptr);
+        explicit SceneManager(QObject* parent = nullptr, QApplication* app = nullptr);
 
         void calculateGrid();
-        void paint();
+        void paint(const QVector3D& lightCoordinate = QVector3D(-1, -1, -1));
         void play();
 
         uint ks() const;
@@ -84,8 +85,9 @@ class SceneManager : public QObject
         bool m_isInCPView;
         bool m_isPlaying;
 
-        QColor m_lightColor;
-        QColor m_backColor;
+        QVector3D m_lightColor;
+        QVector3D m_backColor;
+        Circle m_lightCoordinate;
 
-        QVector3D m_lightCoordinate;
+        QApplication* m_app;
 };

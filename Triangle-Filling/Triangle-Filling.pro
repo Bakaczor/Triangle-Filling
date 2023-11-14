@@ -1,6 +1,9 @@
 QT += quick core gui concurrent widgets
 
+CONFIG += c++17
+
 SOURCES += \
+        Circle.cpp \
         Coloring.cpp \
         ControlPoint.cpp \
         ImageProvider.cpp \
@@ -25,6 +28,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    Circle.h \
     Coloring.h \
     ControlPoint.h \
     ImageProvider.h \

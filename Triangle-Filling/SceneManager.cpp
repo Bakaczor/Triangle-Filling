@@ -1,16 +1,17 @@
 #include <QtConcurrent/QtConcurrent>
 #include <QColorDialog>
 #include <QPainter>
+#include <QApplication>
 
 #include "SceneManager.h"
 
-SceneManager::SceneManager(QObject* parent) : QObject(parent), selectedIdx(-1), m_ks(0), m_kd(0), m_m(1), m_triNum(2),
-    m_showGrid(false), m_isInCPView(false), m_isPlaying(false), m_lightColor(m_white), m_backColor(m_white), m_lightCoordinate(0.5, 0.5, 2)
+SceneManager::SceneManager(QObject* parent, QApplication* app) : QObject(parent), selectedIdx(-1), m_ks(0), m_kd(0), m_m(1), m_triNum(2),
+    m_showGrid(false), m_isInCPView(false), m_isPlaying(false), m_lightColor(1, 1, 1), m_backColor(1, 1, 1), m_lightCoordinate(), m_app(app)
 {
     image = QSharedPointer<QImage>(new QImage(m_size, QImage::Format_RGB888));
     image->fill(m_white);
 
-    // set up control points
+    // set up control points (manually)
     controlPoints = QList<ControlPoint>();
 
     // ensure float division
@@ -57,12 +58,9 @@ void SceneManager::calculateGrid()
     });
 }
 
-void SceneManager::paint()
+void SceneManager::paint(const QVector3D& lightCoordinate)
 {
-    if (!m_isPlaying)
-    {
-        image->fill(m_white);
-    }
+    image->fill(m_white);
     if (m_isInCPView)
     {
         for (const auto& p : controlPoints)
@@ -72,14 +70,13 @@ void SceneManager::paint()
     }
     else
     {
-        const float _255 = 255.0f;
         Lambert params;
-        params.ks = m_ks;
-        params.kd = m_kd;
-        params.m = m_m;
-        params.lightCoordiante = m_lightCoordinate;
-        params.lightColor = QVector3D(m_lightColor.red()/ _255, m_lightColor.green()/ _255, m_lightColor.blue()/ _255);
-        params.backColor = QVector3D(m_backColor.red()/ _255, m_backColor.green()/ _255, m_backColor.blue()/ _255);
+        params.ks = &m_ks;
+        params.kd = &m_kd;
+        params.m = &m_m;
+        params.lightColor = &m_lightColor;
+        params.backColor = &m_backColor;
+        params.lightCoordinate = &lightCoordinate;
 
         QtConcurrent::blockingMap(triangles, [this, &params](Triangle& tri) {
             tri.fill(image, params);
@@ -97,9 +94,20 @@ void SceneManager::paint()
 
 void SceneManager::play()
 {
-    // pętla while z odmierzaniem klatek
-    paint();
-    emit imageChanged();
+    const int frame = 33;
+    QElapsedTimer timer;
+    timer.start();
+    while (m_isPlaying)
+    {
+        timer.restart();
+        paint(m_lightCoordinate.next());
+        const int remaining = frame - timer.elapsed();
+        const int toWait = remaining < 0 ? 0 : remaining;
+        QThread::msleep(toWait);
+        emit imageChanged();
+        // check if there were any actions in GUI
+        m_app->processEvents(QEventLoop::AllEvents);
+    }
 }
 
 void SceneManager::selectPoint(int x, int y)
@@ -135,15 +143,17 @@ void SceneManager::modifyPoint(float z)
 
 void SceneManager::pickLightColor()
 {
+    const float _255 = 255.0f;
     QColor color = QColorDialog::getColor();
-    m_lightColor = color;
+    m_lightColor = QVector3D(color.red() / _255, color.green() / _255, color.blue() / _255);
     emit lightColorChanged();
 }
 
 void SceneManager::pickBackColor()
 {
+    const float _255 = 255.0f;
     QColor color = QColorDialog::getColor();
-    m_backColor = color;
+    m_backColor = QVector3D(color.red() / _255, color.green() / _255, color.blue() / _255);
     emit backColorChanged();
 }
 
@@ -227,6 +237,13 @@ bool SceneManager::isPlaying() const
 
 void SceneManager::setIsPlaying(bool newIsPlaying)
 {
+    // can't play in CPView
+    if (m_isInCPView)
+    {
+        m_isPlaying = false;
+        return;
+    }
+
     if (m_isPlaying == newIsPlaying)
         return;
     m_isPlaying = newIsPlaying;
@@ -257,24 +274,28 @@ void SceneManager::setShowGrid(bool newShowGrid)
 
 QColor SceneManager::lightColor() const
 {
-    return m_lightColor;
+    return QColor(255 * m_lightColor.x(), 255 * m_lightColor.y(), 255 * m_lightColor.z());
 }
 
 void SceneManager::setLightColor(QColor newLightColor)
 {
-    if (m_lightColor == newLightColor)
+    const float _255 = 255.0f;
+    QVector3D newColor(newLightColor.red() / _255, newLightColor.green() / _255, newLightColor.blue() / _255);
+    if (m_lightColor == newColor)
         return;
-    m_lightColor = newLightColor;
+    m_lightColor = newColor;
 }
 
 QColor SceneManager::backColor() const
 {
-    return m_backColor;
+    return QColor(255 * m_backColor.x(), 255 * m_backColor.y(), 255 * m_backColor.z());
 }
 
 void SceneManager::setBackColor(QColor newBackColor)
 {
-    if (m_backColor == newBackColor)
+    const float _255 = 255.0f;
+    QVector3D newColor(newBackColor.red() / _255, newBackColor.green() / _255, newBackColor.blue() / _255);
+    if (m_backColor == newColor)
         return;
-    m_backColor = newBackColor;
+    m_backColor = newColor;
 }

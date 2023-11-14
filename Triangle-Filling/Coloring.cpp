@@ -5,7 +5,7 @@
 
 void colorPixel(QSharedPointer<QImage> image, const QPoint& position, const QVector2D& coordinate, const QVector3D& N, const Lambert& params)
 {
-    const QVector3D L = (params.lightCoordiante - QVector3D(coordinate.x(), coordinate.y(), 0)).normalized();
+    const QVector3D L = (*params.lightCoordinate - QVector3D(coordinate.x(), coordinate.y(), 0)).normalized();
     float cosNL = dotProduct(N, L);
 
     const QVector3D V = { 0, 0, 1 };
@@ -15,11 +15,11 @@ void colorPixel(QSharedPointer<QImage> image, const QPoint& position, const QVec
     if (cosNL < 0) cosNL = 0;
     if (cosVR < 0) cosVR = 0;
 
-    const float RILIO = params.lightColor.x() * params.backColor.x();
-    const float GILIO = params.lightColor.y() * params.backColor.y();
-    const float BILIO = params.lightColor.z() * params.backColor.z();
+    const float RILIO = params.lightColor->x() * params.backColor->x();
+    const float GILIO = params.lightColor->y() * params.backColor->y();
+    const float BILIO = params.lightColor->z() * params.backColor->z();
 
-    const float kd_cosNL_ks_cosmVR = params.kd * cosNL + params.ks * qPow(cosVR, params.m);
+    const float kd_cosNL_ks_cosmVR = *params.kd * cosNL + *params.ks * qPow(cosVR, *params.m);
 
     int pR = 255 * RILIO * (kd_cosNL_ks_cosmVR);
     int pG = 255 * GILIO * (kd_cosNL_ks_cosmVR);

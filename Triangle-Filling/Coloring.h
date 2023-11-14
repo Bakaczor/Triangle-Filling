@@ -2,14 +2,16 @@
 #include <QSharedPointer>
 #include <QVector3D>
 
+#include <Circle.h>
+
 struct Lambert
 {
-    uint ks;
-    uint kd;
-    uint m;
-    QVector3D lightCoordiante;
-    QVector3D lightColor;
-    QVector3D backColor;
+    const uint* ks;
+    const uint* kd;
+    const uint* m;
+    const QVector3D* lightColor;
+    const QVector3D* backColor;
+    const QVector3D* lightCoordinate;
 };
 
 void colorPixel(QSharedPointer<QImage> image, const QPoint& position, const QVector2D& coordinate, const QVector3D& N, const Lambert& params);
