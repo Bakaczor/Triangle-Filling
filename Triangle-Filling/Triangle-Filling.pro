@@ -1,11 +1,12 @@
 QT += quick core gui concurrent widgets
 
-CONFIG += c++17
+CONFIG += c++20
 
 SOURCES += \
         Circle.cpp \
         Coloring.cpp \
         ControlPoint.cpp \
+        Edge.cpp \
         ImageProvider.cpp \
         Maths.cpp \
         SceneManager.cpp \
@@ -31,6 +32,7 @@ HEADERS += \
     Circle.h \
     Coloring.h \
     ControlPoint.h \
+    Edge.h \
     ImageProvider.h \
     Maths.h \
     SceneManager.h \

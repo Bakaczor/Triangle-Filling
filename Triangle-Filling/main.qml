@@ -107,7 +107,7 @@ ApplicationWindow {
                             id: triNumSlider
                             implicitWidth: 150
                             from: 2
-                            value: 2
+                            value: 4
                             to: 10
                             stepSize: 1
                             snapMode: Slider.SnapAlways
@@ -210,7 +210,7 @@ ApplicationWindow {
                                 id: kdSlider
                                 implicitWidth: 150
                                 from: 0
-                                value: 0
+                                value: 0.5
                                 to: 1
                                 stepSize: 0.01
                                 snapMode: Slider.SnapAlways
@@ -227,7 +227,7 @@ ApplicationWindow {
                                 id: ksSlider
                                 implicitWidth: 150
                                 from: 0
-                                value: 0
+                                value: 0.5
                                 to: 1
                                 stepSize: 0.01
                                 snapMode: Slider.SnapAlways
@@ -244,7 +244,7 @@ ApplicationWindow {
                                 id: mSlider
                                 implicitWidth: 150
                                 from: 1
-                                value: 0
+                                value: 50
                                 to: 100
                                 stepSize: 1
                                 snapMode: Slider.SnapAlways

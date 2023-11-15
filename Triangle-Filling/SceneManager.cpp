@@ -5,7 +5,7 @@
 
 #include "SceneManager.h"
 
-SceneManager::SceneManager(QObject* parent, QApplication* app) : QObject(parent), selectedIdx(-1), m_ks(0), m_kd(0), m_m(1), m_triNum(2),
+SceneManager::SceneManager(QObject* parent, QApplication* app) : QObject(parent), selectedIdx(-1), m_ks(0.5), m_kd(0.5), m_m(50), m_triNum(2),
     m_showGrid(false), m_isInCPView(false), m_isPlaying(false), m_lightColor(1, 1, 1), m_backColor(1, 1, 1), m_lightCoordinate(), m_app(app)
 {
     image = QSharedPointer<QImage>(new QImage(m_size, QImage::Format_RGB888));
@@ -54,7 +54,7 @@ void SceneManager::calculateGrid()
     }
 
     QtConcurrent::blockingMap(triangles, [this](Triangle& tri) {
-        tri.calculateNormalVersors(controlPoints);
+        tri.calculateNormalVersorsAndZ(controlPoints);
     });
 }
 
@@ -76,7 +76,15 @@ void SceneManager::paint(const QVector3D& lightCoordinate)
         params.m = &m_m;
         params.lightColor = &m_lightColor;
         params.backColor = &m_backColor;
-        params.lightCoordinate = &lightCoordinate;
+        if (lightCoordinate == QVector3D(-1, -1, -1))
+        {
+            params.lightCoordinate = m_lightCoordinate.current();
+        }
+        else
+        {
+            params.lightCoordinate = lightCoordinate;
+        }
+
 
         QtConcurrent::blockingMap(triangles, [this, &params](Triangle& tri) {
             tri.fill(image, params);
@@ -159,24 +167,24 @@ void SceneManager::pickBackColor()
 
 // PROPERTIES
 
-uint SceneManager::ks() const
+float SceneManager::ks() const
 {
     return m_ks;
 }
 
-void SceneManager::setKs(uint newKs)
+void SceneManager::setKs(float newKs)
 {
     if (m_ks == newKs)
         return;
     m_ks = newKs;
 }
 
-uint SceneManager::kd() const
+float SceneManager::kd() const
 {
     return m_kd;
 }
 
-void SceneManager::setKd(uint newKd)
+void SceneManager::setKd(float newKd)
 {
     if (m_kd == newKd)
         return;
@@ -284,6 +292,10 @@ void SceneManager::setLightColor(QColor newLightColor)
     if (m_lightColor == newColor)
         return;
     m_lightColor = newColor;
+
+    // repaint after changing color
+    paint();
+    emit imageChanged();
 }
 
 QColor SceneManager::backColor() const
@@ -298,4 +310,8 @@ void SceneManager::setBackColor(QColor newBackColor)
     if (m_backColor == newColor)
         return;
     m_backColor = newColor;
+
+    // repaint after changing color
+    paint();
+    emit imageChanged();
 }

@@ -6,12 +6,12 @@
 
 struct Lambert
 {
-    const uint* ks;
-    const uint* kd;
+    const float* ks;
+    const float* kd;
     const uint* m;
     const QVector3D* lightColor;
     const QVector3D* backColor;
-    const QVector3D* lightCoordinate;
+    QVector3D lightCoordinate;
 };
 
-void colorPixel(QSharedPointer<QImage> image, const QPoint& position, const QVector2D& coordinate, const QVector3D& N, const Lambert& params);
+void colorPixel(QSharedPointer<QImage> image, const QPoint& position, const QVector3D& coordinate, const QVector3D& N, const Lambert& params);

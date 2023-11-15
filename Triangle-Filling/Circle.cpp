@@ -1,7 +1,7 @@
 #include <QtMath>
 #include "Circle.h"
 
-Circle::Circle(uint numOfPoints) : m_numOfPoints(numOfPoints)
+Circle::Circle(uint numOfPoints) : m_i(0), m_numOfPoints(numOfPoints)
 {
     const float R = 1 / static_cast<float>(3);
     const QVector2D mid(0.5, 0.5);

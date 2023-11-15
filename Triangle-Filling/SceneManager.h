@@ -3,15 +3,14 @@
 #include <QObject>
 #include <QSharedPointer>
 #include <QImage>
-#include <QMutex>
 
 #include "Triangle.h"
 
 class SceneManager : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(uint ks READ ks NOTIFY ksChanged FINAL)
-    Q_PROPERTY(uint kd READ kd NOTIFY kdChanged FINAL)
+    Q_PROPERTY(float ks READ ks NOTIFY ksChanged FINAL)
+    Q_PROPERTY(float kd READ kd NOTIFY kdChanged FINAL)
     Q_PROPERTY(uint m READ m NOTIFY mChanged FINAL)
     Q_PROPERTY(uint triNum READ triNum NOTIFY triNumChanged FINAL)
     Q_PROPERTY(bool showGrid READ showGrid NOTIFY showGridChanged FINAL)
@@ -31,8 +30,8 @@ class SceneManager : public QObject
         void paint(const QVector3D& lightCoordinate = QVector3D(-1, -1, -1));
         void play();
 
-        uint ks() const;
-        uint kd() const;
+        float ks() const;
+        float kd() const;
         uint m() const;
         bool isInCPView() const;
         bool isPlaying() const;
@@ -47,8 +46,8 @@ class SceneManager : public QObject
         void pickLightColor();
         void pickBackColor();
 
-        void setKs(uint newKs);
-        void setKd(uint newKd);
+        void setKs(float newKs);
+        void setKd(float newKd);
         void setM(uint newM);
         void setIsInCPView(bool newIsInCPView);
         void setIsPlaying(bool newIsPlaying);
@@ -76,8 +75,8 @@ class SceneManager : public QObject
         const QColor m_white = QColor(255, 255, 255);
         const QSize m_size = QSize(600, 600);
 
-        uint m_ks;
-        uint m_kd;
+        float m_ks;
+        float m_kd;
         uint m_m;
         uint m_triNum;
 

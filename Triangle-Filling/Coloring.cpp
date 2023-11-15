@@ -3,9 +3,9 @@
 #include "Coloring.h"
 #include "Maths.h"
 
-void colorPixel(QSharedPointer<QImage> image, const QPoint& position, const QVector2D& coordinate, const QVector3D& N, const Lambert& params)
+void colorPixel(QSharedPointer<QImage> image, const QPoint& position, const QVector3D& coordinate, const QVector3D& N, const Lambert& params)
 {
-    const QVector3D L = (*params.lightCoordinate - QVector3D(coordinate.x(), coordinate.y(), 0)).normalized();
+    const QVector3D L = (params.lightCoordinate - coordinate).normalized();
     float cosNL = dotProduct(N, L);
 
     const QVector3D V = { 0, 0, 1 };
