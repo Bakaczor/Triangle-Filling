@@ -1,11 +1,12 @@
 #include <QtMath>
+#include "math.h"
 #include "Circle.h"
 
 Circle::Circle(uint numOfPoints) : m_i(0), m_numOfPoints(numOfPoints)
 {
     const float R = 1 / static_cast<float>(3);
     const QVector2D mid(0.5, 0.5);
-    const float d = 360 / static_cast<float>(numOfPoints);
+    const float d = 2 * M_PI / numOfPoints;
     QList<float> degrees(numOfPoints);
     degrees[0] = 0;
     for (uint i = 1; i < numOfPoints; i++)

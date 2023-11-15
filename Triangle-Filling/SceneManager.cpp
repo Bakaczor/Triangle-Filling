@@ -137,6 +137,8 @@ void SceneManager::selectPoint(int x, int y)
             break;
         }
     }
+    emit updateCurrentZ();
+
     paint();
     emit imageChanged();
 }
@@ -146,7 +148,19 @@ void SceneManager::modifyPoint(float z)
     if (selectedIdx != -1 && controlPoints.at(selectedIdx).modifiable)
     {
         controlPoints[selectedIdx].coordinate.setZ(z);
+
+        // if modified, recalculate
+        calculateGrid();
     }
+}
+
+int SceneManager::getCurrentZ()
+{
+    if (selectedIdx != -1)
+    {
+        return controlPoints.at(selectedIdx).coordinate.z();
+    }
+    return 0;
 }
 
 void SceneManager::pickLightColor()
@@ -177,6 +191,13 @@ void SceneManager::setKs(float newKs)
     if (m_ks == newKs)
         return;
     m_ks = newKs;
+
+    // if changed and not playing, repaint
+    if (!m_isPlaying)
+    {
+        paint();
+        emit imageChanged();
+    }
 }
 
 float SceneManager::kd() const
@@ -189,6 +210,13 @@ void SceneManager::setKd(float newKd)
     if (m_kd == newKd)
         return;
     m_kd = newKd;
+
+    // if changed and not playing, repaint
+    if (!m_isPlaying)
+    {
+        paint();
+        emit imageChanged();
+    }
 }
 
 uint SceneManager::m() const
@@ -201,6 +229,13 @@ void SceneManager::setM(uint newM)
     if (m_m == newM)
         return;
     m_m = newM;
+
+    // if changed and not playing, repaint
+    if (!m_isPlaying)
+    {
+        paint();
+        emit imageChanged();
+    }
 }
 
 uint SceneManager::triNum() const
@@ -293,9 +328,12 @@ void SceneManager::setLightColor(QColor newLightColor)
         return;
     m_lightColor = newColor;
 
-    // repaint after changing color
-    paint();
-    emit imageChanged();
+    // if changed and not playing, repaint
+    if (!m_isPlaying)
+    {
+        paint();
+        emit imageChanged();
+    }
 }
 
 QColor SceneManager::backColor() const
@@ -311,7 +349,10 @@ void SceneManager::setBackColor(QColor newBackColor)
         return;
     m_backColor = newColor;
 
-    // repaint after changing color
-    paint();
-    emit imageChanged();
+    // if changed and not playing, repaint
+    if (!m_isPlaying)
+    {
+        paint();
+        emit imageChanged();
+    }
 }

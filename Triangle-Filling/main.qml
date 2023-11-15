@@ -23,6 +23,9 @@ ApplicationWindow {
         function onBackColorChanged() {
             backColorRect.color = SceneManager.backColor
         }
+        function onUpdateCurrentZ() {
+            cpSlider.value = SceneManager.getCurrentZ()
+        }
     }
 
     Rectangle {
@@ -87,6 +90,7 @@ ApplicationWindow {
                                 }
                             }
                             Slider {
+                                id: cpSlider
                                 implicitWidth: 100
                                 from: 0
                                 value: 0
@@ -94,6 +98,9 @@ ApplicationWindow {
                                 stepSize: 0.01
                                 snapMode: Slider.SnapAlways
                                 focusPolicy: Qt.NoFocus
+                                onMoved: {
+                                    SceneManager.modifyPoint(cpSlider.value)
+                                }
                             }
                         }
                     }

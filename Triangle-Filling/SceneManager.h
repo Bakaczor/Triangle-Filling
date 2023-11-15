@@ -41,6 +41,7 @@ class SceneManager : public QObject
         QColor backColor() const;
 
     public slots:
+        int getCurrentZ();
         void selectPoint(int x, int y);
         void modifyPoint(float z);
         void pickLightColor();
@@ -58,6 +59,7 @@ class SceneManager : public QObject
 
     signals:
         void imageChanged();
+        void updateCurrentZ();
 
         void ksChanged();
         void kdChanged();

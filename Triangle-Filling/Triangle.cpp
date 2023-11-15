@@ -151,6 +151,7 @@ QPair<QVector3D, QVector3D> Triangle::approxN_Z(const QVector2D& coordinate) con
     const float P0 = triangleArea(vec1.x(), vec1.y(), vec2.x(), vec2.y());
     const float P1 = triangleArea(vec0.x(), vec0.y(), vec2.x(), vec2.y());
     const float P2 = triangleArea(vec0.x(), vec0.y(), vec1.x(), vec1.y());
+
     const QVector3D N =  QVector3D((P0 * normalVersors.at(0) + P1 * normalVersors.at(1) + P2 * normalVersors.at(2)) / (P0 + P1 + P2));
     const float Z = (P0 * coordinates.at(0).z() + P1 * coordinates.at(1).z() + P2 * coordinates.at(2).z()) / (P0 + P1 + P2);
     return qMakePair(N, QVector3D(coordinate, Z));
