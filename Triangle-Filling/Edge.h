@@ -13,7 +13,6 @@ struct Edge
     float _1m;
     int ymin;
     bool horizontal;
-
     /*!
     * \brief Constructs an Edge object
     * \param p1 The first point of the edge

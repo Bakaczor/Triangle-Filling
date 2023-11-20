@@ -13,21 +13,21 @@
 class Circle
 {
     public:
-    /*!
-    * \brief Constructs a Circle object
-    * \param numOfPoints The number of points on the circle
-    */
-    Circle(uint numOfPoints = 120);
-    /*!
-    * \brief Returns the current point on the circle
-    * \return A QVector3D object representing the current point on the circle
-    */
-    QVector3D current() const;
-    /*!
-    * \brief Returns the next point on the circle
-    * \return A QVector3D object representing the next point on the circle
-    */
-    QVector3D next();
+        /*!
+        * \brief Constructs a Circle object
+        * \param numOfPoints The number of points on the circle
+        */
+        Circle(uint numOfPoints = 120);
+        /*!
+        * \brief Returns the current point on the circle
+        * \return A QVector3D object representing the current point on the circle
+        */
+        QVector3D current() const;
+        /*!
+        * \brief Returns the next point on the circle
+        * \return A QVector3D object representing the next point on the circle
+        */
+        QVector3D next();
 
     private:
         const float m_lightZ = 1.5f;
