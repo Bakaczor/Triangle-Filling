@@ -1,40 +1,41 @@
-#include <QtConcurrent/QtConcurrent>
-#include <QColorDialog>
-#include <QPainter>
-#include <QApplication>
-
 #include "SceneManager.h"
 
-SceneManager::SceneManager(QObject* parent, QApplication* app) : QObject(parent), selectedIdx(-1), m_ks(0.5), m_kd(0.5), m_m(50), m_triNum(2),
-    m_showGrid(false), m_isInCPView(false), m_isPlaying(false), m_lightColor(1, 1, 1), m_backColor(1, 1, 1), m_lightCoordinate(), m_app(app)
+SceneManager::SceneManager(QObject* parent, QApplication* app) : QObject(parent), selectedIdx(-1), m_ks(0.5), m_kd(0.5), m_m(50), m_triNum(7),
+    m_showGrid(false), m_isInCPView(false), m_isPlaying(false), m_lightColor(1, 1, 1), m_backColor(1, 1, 1), m_lightCoordinate(), m_app(app),
+    m_colors(m_size.width() * m_size.height()), m_useBackColor(true), m_texture(m_size.width() * m_size.height()), m_useTexture(false)
 {
-    image = QSharedPointer<QImage>(new QImage(m_size, QImage::Format_RGB888));
+    image = QSharedPointer<QImage>(new QImage(m_size, QImage::Format_RGB32));
     image->fill(m_white);
 
     // set up control points (manually)
     controlPoints = QList<ControlPoint>();
 
     // ensure float division
-    const float _3 = 3.0f;
+    const float _13 = 1.0f / 3.0f;
+    const float _23 = 2.0f / 3.0f;
+    const float w_13 = _13 * m_size.width();
+    const float w_23 = _23 * m_size.width();
+    const float h_13 = _13 * m_size.height();
+    const float h_23 = _23 * m_size.height();
 
     controlPoints.append(ControlPoint(QPoint(0, 0), QVector3D(0, 1, 0), false));
-    controlPoints.append(ControlPoint(QPoint(m_size.width() / 3, 0), QVector3D(1 / _3, 1, 0), true));
-    controlPoints.append(ControlPoint(QPoint(2 * m_size.width() / 3, 0), QVector3D(2 / _3, 1, 0), true));
-    controlPoints.append(ControlPoint(QPoint(m_size.width(), 0), QVector3D(1, 1, 0), false));
-
-    controlPoints.append(ControlPoint(QPoint(0, m_size.height() / 3), QVector3D(0, 2 / _3, 0), true));
-    controlPoints.append(ControlPoint(QPoint(m_size.width() / 3, m_size.height() / 3), QVector3D(1 / _3, 2 / _3, 0), true));
-    controlPoints.append(ControlPoint(QPoint(2 * m_size.width() / 3, m_size.height() / 3), QVector3D(2 / _3, 2 / _3, 0), true));
-    controlPoints.append(ControlPoint(QPoint(m_size.width(), m_size.height() / 3), QVector3D(1, 2 / _3, 0), true));
-
-    controlPoints.append(ControlPoint(QPoint(0, 2 * m_size.height() / 3), QVector3D(0, 1 / _3, 0), true));
-    controlPoints.append(ControlPoint(QPoint(m_size.width() / 3, 2 * m_size.height() / 3), QVector3D(1 / _3, 1 / _3, 0), true));
-    controlPoints.append(ControlPoint(QPoint(2 * m_size.width() / 3, 2 * m_size.height() / 3), QVector3D(2 / _3, 1 / _3, 0), true));
-    controlPoints.append(ControlPoint(QPoint(m_size.width(), 2 * m_size.height() / 3), QVector3D(1, 1 / _3, 0), true));
-
+    controlPoints.append(ControlPoint(QPoint(m_size.width(), h_23), QVector3D(1, _13, 0), true));
+    controlPoints.append(ControlPoint(QPoint(m_size.width(), h_13), QVector3D(1, _23, 0), true));
     controlPoints.append(ControlPoint(QPoint(0, m_size.height()), QVector3D(0, 0, 0), false));
-    controlPoints.append(ControlPoint(QPoint(m_size.width() / 3, m_size.height()), QVector3D(1 / _3, 0, 0), true));
-    controlPoints.append(ControlPoint(QPoint(2 * m_size.width() / 3, m_size.height()), QVector3D(2 / _3, 0, 0), true));
+
+    controlPoints.append(ControlPoint(QPoint(w_23, m_size.height()), QVector3D(_23, 0, 0), true));
+    controlPoints.append(ControlPoint(QPoint(w_13, h_13), QVector3D(_13, _23, 0), true));
+    controlPoints.append(ControlPoint(QPoint(w_13, h_23), QVector3D(_13, _13, 0), true));
+    controlPoints.append(ControlPoint(QPoint(w_23, 0), QVector3D(_23, 1, 0), true));
+
+    controlPoints.append(ControlPoint(QPoint(w_13, m_size.height()), QVector3D(_13, 0, 0), true));
+    controlPoints.append(ControlPoint(QPoint(w_23, h_13), QVector3D(_23, _23, 0), true));
+    controlPoints.append(ControlPoint(QPoint(w_23, h_23), QVector3D(_23, _13, 0), true));
+    controlPoints.append(ControlPoint(QPoint(w_13, 0), QVector3D(_13, 1, 0), true));
+
+    controlPoints.append(ControlPoint(QPoint(m_size.width(), 0), QVector3D(1, 1, 0), false));
+    controlPoints.append(ControlPoint(QPoint(0, h_23), QVector3D(0, _13, 0), true));
+    controlPoints.append(ControlPoint(QPoint(0, h_13), QVector3D(0, _23, 0), true));
     controlPoints.append(ControlPoint(QPoint(m_size.width(), m_size.height()), QVector3D(1, 0, 0), false));
 
     triangles = QList<Triangle>();
@@ -44,8 +45,8 @@ SceneManager::SceneManager(QObject* parent, QApplication* app) : QObject(parent)
 void SceneManager::calculateGrid()
 {
     triangles.clear();
-    const float dx = m_size.width() / static_cast<float>(m_triNum);
-    const float dy = m_size.height() / static_cast<float>(m_triNum);
+    const float dx = (m_size.width() - 1) / static_cast<float>(m_triNum);
+    const float dy = (m_size.height() - 1) / static_cast<float>(m_triNum);
     for (uint i = 0; i < m_triNum; i++) {
         for (uint j = 0; j < m_triNum; j++) {
             triangles.append(Triangle({ QPoint(i * dx, j * dy), QPoint((i + 1) * dx, j * dy), QPoint(i * dx, (j + 1) * dy) }, m_size));
@@ -58,33 +59,20 @@ void SceneManager::calculateGrid()
     });
 }
 
-void SceneManager::paint(const QVector3D& lightCoordinate)
+void SceneManager::paint()
 {
     image->fill(m_white);
     if (m_isInCPView)
     {
-        for (const auto& p : controlPoints)
+        for (const ControlPoint& p : controlPoints)
         {
             p.paint(image);
         }
     }
     else
     {
-        Lambert params;
-        params.ks = &m_ks;
-        params.kd = &m_kd;
-        params.m = &m_m;
-        params.lightColor = &m_lightColor;
-        params.backColor = &m_backColor;
-        if (lightCoordinate == QVector3D(-1, -1, -1))
-        {
-            params.lightCoordinate = m_lightCoordinate.current();
-        }
-        else
-        {
-            params.lightCoordinate = lightCoordinate;
-        }
-
+        Lambert params(m_size.width(), &m_ks, &m_kd, &m_m, &m_lightColor, &m_backColor,
+            m_isPlaying ? m_lightCoordinate.next() : m_lightCoordinate.current(), &m_colors, m_useBackColor, &m_texture, m_useTexture);
 
         QtConcurrent::blockingMap(triangles, [this, &params](Triangle& tri) {
             tri.fill(image, params);
@@ -92,7 +80,7 @@ void SceneManager::paint(const QVector3D& lightCoordinate)
 
         if (m_showGrid)
         {
-            for (const auto& tri : triangles)
+            for (const Triangle& tri : triangles)
             {
                 tri.paint(image);
             }
@@ -102,13 +90,13 @@ void SceneManager::paint(const QVector3D& lightCoordinate)
 
 void SceneManager::play()
 {
-    const int frame = 33;
+    const int frame = 30;
     QElapsedTimer timer;
     timer.start();
     while (m_isPlaying)
     {
         timer.restart();
-        paint(m_lightCoordinate.next());
+        paint();
         const int remaining = frame - timer.elapsed();
         const int toWait = remaining < 0 ? 0 : remaining;
         QThread::msleep(toWait);
@@ -137,6 +125,7 @@ void SceneManager::selectPoint(int x, int y)
             break;
         }
     }
+    // update slider
     emit updateCurrentZ();
 
     paint();
@@ -154,7 +143,7 @@ void SceneManager::modifyPoint(float z)
     }
 }
 
-int SceneManager::getCurrentZ()
+float SceneManager::getCurrentZ()
 {
     if (selectedIdx != -1)
     {
@@ -169,6 +158,13 @@ void SceneManager::pickLightColor()
     QColor color = QColorDialog::getColor();
     m_lightColor = QVector3D(color.red() / _255, color.green() / _255, color.blue() / _255);
     emit lightColorChanged();
+
+    // if changed and not playing, repaint
+    if (!m_isPlaying)
+    {
+        paint();
+        emit imageChanged();
+    }
 }
 
 void SceneManager::pickBackColor()
@@ -176,10 +172,68 @@ void SceneManager::pickBackColor()
     const float _255 = 255.0f;
     QColor color = QColorDialog::getColor();
     m_backColor = QVector3D(color.red() / _255, color.green() / _255, color.blue() / _255);
+    m_useBackColor = true;
     emit backColorChanged();
+
+    // if changed and not playing, repaint
+    if (!m_isPlaying)
+    {
+        paint();
+        emit imageChanged();
+    }
 }
 
-// PROPERTIES
+void SceneManager::pickImage()
+{
+    setIsPlaying(false);
+    QString fileName = QFileDialog::getOpenFileName(nullptr, tr("Open File"), "/home", tr("Images (*.png *.jpg)"));
+    if (!fileName.isEmpty())
+    {
+        QImage background(fileName);
+        background = background.scaled(m_size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        background.convertTo(QImage::Format_RGB32);
+        QRgb* data = reinterpret_cast<QRgb*>(background.bits());
+        int N = m_size.width() * m_size.height();
+        const float _255 = 255.0f;
+        for (int i = 0; i < N; i++)
+        {
+           m_colors[i] = QVector3D(qRed(data[i]) / _255, qGreen(data[i]) / _255, qBlue(data[i]) / _255);
+        }
+        m_useBackColor = false;
+    }
+    else
+    {
+        m_useBackColor = true;
+    }
+    paint();
+    emit imageChanged();
+}
+
+void SceneManager::pickTexture()
+{
+    setIsPlaying(false);
+    QString fileName = QFileDialog::getOpenFileName(nullptr, tr("Open File"), "/home", tr("Images (*.png *.jpg)"));
+    if (!fileName.isEmpty())
+    {
+        QImage background(fileName);
+        background = background.scaled(m_size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        background.convertTo(QImage::Format_RGB32);
+        QRgb* data = reinterpret_cast<QRgb*>(background.bits());
+        int N = m_size.width() * m_size.height();
+        const float _127_5 = 127.5f;
+        for (int i = 0; i < N; i++)
+        {
+           m_texture[i] = QVector3D((qRed(data[i]) - _127_5) / _127_5, (qGreen(data[i]) - _127_5) / _127_5, (qBlue(data[i]) - _127_5) / _127_5);
+        }
+        m_useTexture = true;
+    }
+    else
+    {
+        m_useTexture = false;
+    }
+    paint();
+    emit imageChanged();
+}
 
 float SceneManager::ks() const
 {
@@ -348,6 +402,7 @@ void SceneManager::setBackColor(QColor newBackColor)
     if (m_backColor == newColor)
         return;
     m_backColor = newColor;
+    m_useBackColor = true;
 
     // if changed and not playing, repaint
     if (!m_isPlaying)

@@ -98,8 +98,10 @@ ApplicationWindow {
                                 stepSize: 0.01
                                 snapMode: Slider.SnapAlways
                                 focusPolicy: Qt.NoFocus
-                                onMoved: {
-                                    SceneManager.modifyPoint(cpSlider.value)
+                                onPressedChanged: {
+                                    if (!cpSlider.pressed) {
+                                        SceneManager.modifyPoint(cpSlider.value)
+                                    }
                                 }
                             }
                         }
@@ -114,8 +116,8 @@ ApplicationWindow {
                             id: triNumSlider
                             implicitWidth: 150
                             from: 2
-                            value: 4
-                            to: 10
+                            value: 7
+                            to: 15
                             stepSize: 1
                             snapMode: Slider.SnapAlways
                             focusPolicy: Qt.NoFocus
@@ -185,6 +187,9 @@ ApplicationWindow {
                             text: "image"
                             height: 25
                             width: 60
+                            onClicked: {
+                                SceneManager.pickImage()
+                            }
                         }
                     }
                     Row {
@@ -197,6 +202,9 @@ ApplicationWindow {
                             text: "map"
                             height: 25
                             width: 60
+                            onClicked: {
+                                SceneManager.pickTexture()
+                            }
                         }
                     }
                     Column {

@@ -1,5 +1,3 @@
-#include <QtMath>
-#include "math.h"
 #include "Circle.h"
 
 Circle::Circle(uint numOfPoints) : m_i(0), m_numOfPoints(numOfPoints)

@@ -1,11 +1,18 @@
 #pragma once
 
+#include <QColorDialog>
+#include <QFileDialog>
+#include <QApplication>
 #include <QObject>
-#include <QSharedPointer>
-#include <QImage>
 
+#include "Circle.h"
 #include "Triangle.h"
 
+/*!
+ * \brief The SceneManager class
+ * This class manages a pseudo-3D scene, containing a list of control points and triangles.
+ * It also manages the colors of the scene, lighting, and texture.
+ */
 class SceneManager : public QObject
 {
     Q_OBJECT
@@ -24,10 +31,23 @@ class SceneManager : public QObject
         QList<Triangle> triangles;
         uint selectedIdx;
 
+        /*!
+         * \brief Constructs a SceneManager object
+         * \param parent A pointer to the parent QObject.
+         * \param app A pointer to the QApplication.
+         */
         explicit SceneManager(QObject* parent = nullptr, QApplication* app = nullptr);
-
+        /*!
+         * \brief Calculates the grid of triangles for the scene
+         */
         void calculateGrid();
-        void paint(const QVector3D& lightCoordinate = QVector3D(-1, -1, -1));
+        /*!
+         * \brief Renders the scene
+         */
+        void paint();
+        /*!
+         * \brief Plays the specified animation
+         */
         void play();
 
         float ks() const;
@@ -41,11 +61,13 @@ class SceneManager : public QObject
         QColor backColor() const;
 
     public slots:
-        int getCurrentZ();
+        float getCurrentZ();
         void selectPoint(int x, int y);
         void modifyPoint(float z);
         void pickLightColor();
         void pickBackColor();
+        void pickImage();
+        void pickTexture();
 
         void setKs(float newKs);
         void setKd(float newKd);
@@ -91,4 +113,9 @@ class SceneManager : public QObject
         Circle m_lightCoordinate;
 
         QApplication* m_app;
+
+        std::vector<QVector3D> m_colors;
+        bool m_useBackColor;
+        std::vector<QVector3D> m_texture;
+        bool m_useTexture;
 };

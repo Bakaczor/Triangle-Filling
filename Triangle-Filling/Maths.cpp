@@ -1,5 +1,17 @@
+#include "Maths.h"
 
-float B(const int &i, const float &t)
+float B2(const int &i, const float &t)
+{
+    switch(i)
+    {
+    case 0: return (1 - t) * (1 - t);
+    case 1: return 2 * t * (1 - t);
+    case 2: return t * t;
+    default: return 0;
+    }
+}
+
+float B3(const int &i, const float &t)
 {
     switch(i)
     {
@@ -11,7 +23,7 @@ float B(const int &i, const float &t)
     }
 }
 
-float dB(const int &i, const float &t)
+float dB3(const int &i, const float &t)
 {
     switch(i)
     {
