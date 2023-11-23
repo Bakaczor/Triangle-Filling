@@ -1,7 +1,8 @@
 #include "SceneManager.h"
 
-SceneManager::SceneManager(QObject* parent, QApplication* app) : QObject(parent), selectedIdx(-1), m_ks(0.5), m_kd(0.5), m_m(50), m_triNum(7),
-    m_showGrid(false), m_isInCPView(false), m_isPlaying(false), m_lightColor(1, 1, 1), m_backColor(1, 1, 1), m_lightCoordinate(), m_app(app),
+SceneManager::SceneManager(QObject* parent, QApplication* app) : QObject(parent), selectedIdx(-1), m_alfa(0), m_beta(0), m_ks(0.5), m_kd(0.5),
+    m_m(50), m_triNum(7), m_fillGrid(true), m_showGrid(false), m_isInCPView(false), m_isPlaying(false), m_gridType(true),
+    m_lightColor(1, 1, 1), m_backColor(1, 1, 1), m_lightCoordinate(), m_app(app),
     m_colors(m_size.width() * m_size.height()), m_useBackColor(true), m_texture(m_size.width() * m_size.height()), m_useTexture(false)
 {
     image = QSharedPointer<QImage>(new QImage(m_size, QImage::Format_RGB32));
@@ -55,7 +56,7 @@ void SceneManager::calculateGrid()
     }
 
     QtConcurrent::blockingMap(triangles, [this](Triangle& tri) {
-        tri.calculateNormalVersorsAndZ(controlPoints);
+        tri.calculateNormalVersorsAndZ(controlPoints, m_gridType);
     });
 }
 
@@ -71,18 +72,21 @@ void SceneManager::paint()
     }
     else
     {
-        Lambert params(m_size.width(), &m_ks, &m_kd, &m_m, &m_lightColor, &m_backColor,
-            m_isPlaying ? m_lightCoordinate.next() : m_lightCoordinate.current(), &m_colors, m_useBackColor, &m_texture, m_useTexture);
+        // new functionality
+        if (m_fillGrid) {
+            Lambert params(m_size.width(), &m_ks, &m_kd, &m_m, &m_lightColor, &m_backColor, &m_alfa, &m_beta,
+                           m_isPlaying ? m_lightCoordinate.next() : m_lightCoordinate.current(), &m_colors, m_useBackColor, &m_texture, m_useTexture);
 
-        QtConcurrent::blockingMap(triangles, [this, &params](Triangle& tri) {
-            tri.fill(image, params);
-        });
+            QtConcurrent::blockingMap(triangles, [this, &params](Triangle& tri) {
+                tri.fill(image, params);
+            });
+        }
 
         if (m_showGrid)
         {
             for (const Triangle& tri : triangles)
             {
-                tri.paint(image);
+                tri.paint(image, m_alfa, m_beta);
             }
         }
     }
@@ -235,6 +239,16 @@ void SceneManager::pickTexture()
     emit imageChanged();
 }
 
+void SceneManager::changeGridType()
+{
+    m_gridType = !m_gridType;
+    // if changed, stop, recalculate and repaint
+    setIsPlaying(false);
+    calculateGrid();
+    paint();
+    emit imageChanged();
+}
+
 float SceneManager::ks() const
 {
     return m_ks;
@@ -369,6 +383,20 @@ void SceneManager::setShowGrid(bool newShowGrid)
     }
 }
 
+void SceneManager::setFillGrid(bool newFillGrid)
+{
+    if (m_fillGrid == newFillGrid)
+        return;
+    m_fillGrid = newFillGrid;
+
+    // if changed and not playing, repaint
+    if (!m_isPlaying)
+    {
+        paint();
+        emit imageChanged();
+    }
+}
+
 QColor SceneManager::lightColor() const
 {
     return QColor(255 * m_lightColor.x(), 255 * m_lightColor.y(), 255 * m_lightColor.z());
@@ -410,4 +438,47 @@ void SceneManager::setBackColor(QColor newBackColor)
         paint();
         emit imageChanged();
     }
+}
+
+void SceneManager::setAlfa(float newAlfa)
+{
+    if (m_alfa == newAlfa)
+        return;
+    m_alfa = newAlfa;
+
+    // if changed and not playing, repaint
+    if (!m_isPlaying)
+    {
+        paint();
+        emit imageChanged();
+    }
+}
+
+void SceneManager::setBeta(float newBeta)
+{
+    if (m_beta == newBeta)
+        return;
+    m_beta = newBeta;
+
+    // if changed and not playing, repaint
+    if (!m_isPlaying)
+    {
+        paint();
+        emit imageChanged();
+    }
+}
+
+bool SceneManager::fillGrid() const
+{
+    return m_fillGrid;
+}
+
+float SceneManager::alfa() const
+{
+    return m_alfa;
+}
+
+float SceneManager::beta() const
+{
+    return m_beta;
 }

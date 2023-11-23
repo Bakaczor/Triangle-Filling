@@ -73,10 +73,9 @@ ApplicationWindow {
 
                 Column {
                     padding: 7
-                    spacing: 20
+                    spacing: 15
                     Column {
                         focus: false
-                        spacing: 5
                         Label {
                             text: "Control points management:"
                         }
@@ -108,7 +107,6 @@ ApplicationWindow {
                     }
                     Column {
                         focus: false
-                        spacing: 5
                         Label {
                             text: "Triangulation:"
                         }
@@ -125,11 +123,23 @@ ApplicationWindow {
                                 SceneManager.setTriNum(triNumSlider.value)
                             }
                         }
-                        CheckBox {
-                            id: triNumCheckBox
-                            text: "show grid"
-                            onClicked: {
-                                SceneManager.setShowGrid(triNumCheckBox.checked)
+                        Row {
+                            CheckBox {
+                                id: triNumCheckBox
+                                text: "show grid"
+                                height: 10
+                                onClicked: {
+                                    SceneManager.setShowGrid(triNumCheckBox.checked)
+                                }
+                            }
+                            CheckBox {
+                                id: fillCheckBox
+                                text: "fill grid"
+                                checked: true
+                                height: 10
+                                onClicked: {
+                                    SceneManager.setFillGrid(fillCheckBox.checked)
+                                }
                             }
                         }
                     }
@@ -207,19 +217,36 @@ ApplicationWindow {
                             }
                         }
                     }
-                    Column {
+                    Row {
                         focus: false
                         spacing: 5
+                        RadioButton {
+                            text: "Bezier"
+                            checked: true
+                            height: 10
+                            onClicked: {
+                                SceneManager.changeGridType()
+                            }
+                        }
+                        RadioButton {
+                            text: "Functional"
+                            height: 10
+                            onClicked: {
+                                SceneManager.changeGridType()
+                            }
+                        }
+                    }
+                    Column {
+                        focus: false
                         Label {
                             text: "Parameters:"
                         }
                         Grid {
                             columns: 2
-                            rows: 3
-                            spacing: 5
+                            rows: 5
                             Label {
                                 text: "kd:"
-                                y: parent.y - 12
+                                y: parent.y - 10
                             }
                             Slider {
                                 id: kdSlider
@@ -236,7 +263,7 @@ ApplicationWindow {
                             }
                             Label {
                                 text: "ks:"
-                                y: parent.y + 34
+                                y: parent.y + 35
                             }
                             Slider {
                                 id: ksSlider
@@ -253,7 +280,7 @@ ApplicationWindow {
                             }
                             Label {
                                 text: "m:"
-                                y: parent.y + 78
+                                y: parent.y + 75
                             }
                             Slider {
                                 id: mSlider
@@ -266,6 +293,40 @@ ApplicationWindow {
                                 focusPolicy: Qt.NoFocus
                                 onMoved: {
                                     SceneManager.setM(mSlider.value)
+                                }
+                            }
+                            Label {
+                                text: "alfa:"
+                                y: parent.y + 115
+                            }
+                            Slider {
+                                id: alfaSlider
+                                implicitWidth: 150
+                                from: 0
+                                value: 0
+                                to: 1
+                                stepSize: 0.01
+                                snapMode: Slider.SnapAlways
+                                focusPolicy: Qt.NoFocus
+                                onMoved: {
+                                    SceneManager.setAlfa(alfaSlider.value)
+                                }
+                            }
+                            Label {
+                                text: "beta:"
+                                y: parent.y + 155
+                            }
+                            Slider {
+                                id: betaSlider
+                                implicitWidth: 150
+                                from: 0
+                                value: 0
+                                to: 1
+                                stepSize: 0.01
+                                snapMode: Slider.SnapAlways
+                                focusPolicy: Qt.NoFocus
+                                onMoved: {
+                                    SceneManager.setBeta(betaSlider.value)
                                 }
                             }
                         }

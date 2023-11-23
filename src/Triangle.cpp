@@ -1,6 +1,7 @@
 ﻿#include "Maths.h"
 #include "Triangle.h"
 #include "Edge.h"
+#include <math.h>
 
 Triangle::Triangle(QList<QPoint> positions, QSize size) : positions(positions), m_color(0, 0, 255),
     m_width(size.width()), m_height(size.height())
@@ -13,44 +14,78 @@ Triangle::Triangle(QList<QPoint> positions, QSize size) : positions(positions), 
     normalVersors = QList<QVector3D>(3);
 }
 
-void Triangle::calculateNormalVersorsAndZ(const QList<ControlPoint>& controlPoints)
+void Triangle::calculateNormalVersorsAndZ(const QList<ControlPoint>& controlPoints, bool curveType)
 {
-    QtConcurrent::map(coordinates, [this, &controlPoints](QVector3D& cor) {
-        std::ptrdiff_t k = std::distance(&coordinates[0], &cor);
-        double du = 0.0f;
-        double dv = 0.0f;
-        double Z = 0.0f;
-        const int n = 3;
-        for (int i = 0; i <= n; i++)
-        {
-            for (int j = 0; j <= n; j++)
+    if (curveType)
+    {
+        QtConcurrent::map(coordinates, [this, &controlPoints](QVector3D& cor) {
+            std::ptrdiff_t k = std::distance(&coordinates[0], &cor);
+            double du = 0.0f;
+            double dv = 0.0f;
+            double Z = 0.0f;
+            const int n = 3;
+            for (int i = 0; i <= n; i++)
             {
-                const double& zij = controlPoints.at(ij2k(i, j)).coordinate.z();
-                if (i < n)
+                for (int j = 0; j <= n; j++)
                 {
-                    du += (controlPoints.at(ij2k(i + 1, j)).coordinate.z() - zij) * B2(i, cor.x()) * B3(j, cor.y());
+                    const double& zij = controlPoints.at(ij2k(i, j)).coordinate.z();
+                    if (i < n)
+                    {
+                        du += (controlPoints.at(ij2k(i + 1, j)).coordinate.z() - zij) * B2(i, cor.x()) * B3(j, cor.y());
+                    }
+                    if (j < n)
+                    {
+                        dv += (controlPoints.at(ij2k(i, j + 1)).coordinate.z() - zij) * B3(i, cor.x()) * B2(j, cor.y());
+                    }
+                    Z += zij * B3(i, cor.x()) * B3(j, cor.y());
                 }
-                if (j < n)
-                {
-                    dv += (controlPoints.at(ij2k(i, j + 1)).coordinate.z() - zij) * B3(i, cor.x()) * B2(j, cor.y());
-                }
-                Z += zij * B3(i, cor.x()) * B3(j, cor.y());
             }
-        }
-        du *= n;
-        dv *= n;
-        normalVersors[k] = QVector3D(-du, -dv, 1).normalized();
-        coordinates[k].setZ(Z);
-    });
+            du *= n;
+            dv *= n;
+            normalVersors[k] = QVector3D(-du, -dv, 1).normalized();
+            coordinates[k].setZ(Z);
+        });
+    }
+    else
+    {
+        // new functionality
+        QtConcurrent::map(coordinates, [this](QVector3D& cor) {
+            std::ptrdiff_t k = std::distance(&coordinates[0], &cor);
+            const double pi_2 = M_PI / 2;
+            double d = pi_2 * cos(pi_2 * (cor.x() + cor.y()));
+            double Z = sin(pi_2 * (cor.x() + cor.y()));
+            normalVersors[k] = QVector3D(-d, -d, 1).normalized();
+            coordinates[k].setZ(Z);
+        });
+    }
 }
 
-void Triangle::paint(QSharedPointer<QImage> image) const
+void Triangle::paint(QSharedPointer<QImage> image, const float& alfa, const float& beta) const
 {
     QPainter painter(image.get());
     QPen pen(m_color);
     pen.setWidth(1);
     painter.setPen(pen);
-    painter.drawPolygon(positions);
+
+    if (alfa ==0 && beta == 0)
+    {
+        painter.drawPolygon(positions);
+    }
+    else
+    {
+        // new functionality
+        QList<QPoint> rotated;
+        for (const QPoint& p : positions)
+        {
+            QPoint rt = rotate(QVector4D(p.x(), p.y(), 300, 1), m_width, m_height, alfa, beta);
+
+            if (rt.x() > 0 && rt.y() > 0 && rt.x() < m_width && rt.y() < m_height)
+            {
+                rotated.append(rt);
+            }
+        }
+        painter.drawPolygon(rotated);
+    }
 }
 
 void Triangle::fill(QSharedPointer<QImage> image, const Lambert& params) const
@@ -123,7 +158,19 @@ void Triangle::fill(QSharedPointer<QImage> image, const Lambert& params) const
             while (xstart <= xend)
             {
                 QPair<QVector3D, QVector3D> N_Z = approxN_Z(QVector2D(static_cast<float>(xstart) / m_width, static_cast<float>(ystart) / m_height));
-                colorPixel(image, QPoint(xstart, ystart), N_Z.second, N_Z.first, params);
+                if (*params.alfa == 0 && *params.beta == 0)
+                {
+                    colorPixel(image, QPoint(xstart, ystart), N_Z.second, N_Z.first, params);
+                }
+                else
+                {
+                    // new functionality
+                    QPoint rotated = rotate(QVector4D(xstart, ystart, 300, 1), m_width, m_height, *params.alfa, *params.beta);
+                    if (rotated.x() > 0 && rotated.y() > 0 && rotated.x() < m_width && rotated.y() < m_height)
+                    {
+                        colorPixel(image, rotated, N_Z.second, N_Z.first, params);
+                    }
+                }
                 xstart++;
             }
             std::advance(it1, 2);

@@ -20,13 +20,16 @@ struct Lambert
     bool useBackColor;
     const std::vector<QVector3D>* texture;
     bool useTexture;
+    // new functionality
+    const float* alfa;
+    const float* beta;
 
     const QVector3D V = { 0, 0, 1 };
 
-    Lambert(int width, float* ks, float* kd, uint* m, QVector3D* lightColor, QVector3D* backColor,
+    Lambert(int width, float* ks, float* kd, uint* m, QVector3D* lightColor, QVector3D* backColor, float* alfa, float* beta,
         QVector3D lightCoordinate, std::vector<QVector3D>* colors, bool useBackColor, std::vector<QVector3D>* texture, bool useTexture) :
-    width(width), ks(ks), kd(kd), m(m), lightColor(lightColor), backColor(backColor),
-        lightCoordinate(lightCoordinate), colors(colors), useBackColor(useBackColor), texture(texture), useTexture(useTexture) {}
+        width(width), ks(ks), kd(kd), m(m), lightColor(lightColor), backColor(backColor), lightCoordinate(lightCoordinate), colors(colors),
+        useBackColor(useBackColor), texture(texture), useTexture(useTexture), alfa(alfa), beta(beta) {}
 };
 
 /*!

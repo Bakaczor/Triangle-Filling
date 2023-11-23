@@ -4,7 +4,7 @@
 #include <QtMath>
 #include <QList>
 
-#include "math.h"
+#include <math.h>
 
 /*!
  * \brief The Circle class
@@ -17,7 +17,7 @@ class Circle
         * \brief Constructs a Circle object
         * \param numOfPoints The number of points on the circle
         */
-        Circle(uint numOfPoints = 120);
+        Circle(uint numOfPoints = 90);
         /*!
         * \brief Returns the current point on the circle
         * \return A QVector3D object representing the current point on the circle
@@ -30,7 +30,7 @@ class Circle
         QVector3D next();
 
     private:
-        const float m_lightZ = 1.5f;
+        const float m_lightZ = 2.0f;
         uint m_i;
         uint m_numOfPoints;
         QList<QVector2D> m_points;

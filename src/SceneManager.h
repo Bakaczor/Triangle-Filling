@@ -16,11 +16,14 @@
 class SceneManager : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(float alfa READ alfa NOTIFY alfaChanged FINAL)
+    Q_PROPERTY(float beta READ beta NOTIFY betaChanged FINAL)
     Q_PROPERTY(float ks READ ks NOTIFY ksChanged FINAL)
     Q_PROPERTY(float kd READ kd NOTIFY kdChanged FINAL)
     Q_PROPERTY(uint m READ m NOTIFY mChanged FINAL)
     Q_PROPERTY(uint triNum READ triNum NOTIFY triNumChanged FINAL)
     Q_PROPERTY(bool showGrid READ showGrid NOTIFY showGridChanged FINAL)
+    Q_PROPERTY(bool fillGrid READ fillGrid NOTIFY fillGridChanged FINAL)
     Q_PROPERTY(bool isInCPView READ isInCPView NOTIFY isInCPViewChanged FINAL)
     Q_PROPERTY(bool isPlaying READ isPlaying NOTIFY isPlayingChanged FINAL)
     Q_PROPERTY(QColor lightColor READ lightColor NOTIFY lightColorChanged FINAL)
@@ -50,6 +53,8 @@ class SceneManager : public QObject
          */
         void play();
 
+        float alfa() const;
+        float beta() const;
         float ks() const;
         float kd() const;
         uint m() const;
@@ -57,6 +62,7 @@ class SceneManager : public QObject
         bool isPlaying() const;
         uint triNum() const;
         bool showGrid() const;
+        bool fillGrid() const;
         QColor lightColor() const;
         QColor backColor() const;
 
@@ -68,7 +74,10 @@ class SceneManager : public QObject
         void pickBackColor();
         void pickImage();
         void pickTexture();
+        void changeGridType();
 
+        void setAlfa(float newAlfa);
+        void setBeta(float newBeta);
         void setKs(float newKs);
         void setKd(float newKd);
         void setM(uint newM);
@@ -76,6 +85,7 @@ class SceneManager : public QObject
         void setIsPlaying(bool newIsPlaying);
         void setTriNum(uint newTriNum);
         void setShowGrid(bool newShowGrid);
+        void setFillGrid(bool newFillGrid);
         void setLightColor(QColor newLightColor);
         void setBackColor(QColor newBackColor);
 
@@ -83,6 +93,8 @@ class SceneManager : public QObject
         void imageChanged();
         void updateCurrentZ();
 
+        void alfaChanged();
+        void betaChanged();
         void ksChanged();
         void kdChanged();
         void mChanged();
@@ -91,22 +103,27 @@ class SceneManager : public QObject
         void isPlayingChanged();
         void triNumChanged();
         void showGridChanged();
+        void fillGridChanged();
 
         void lightColorChanged();
         void backColorChanged();
 
     private:
         const QColor m_white = QColor(255, 255, 255);
-        const QSize m_size = QSize(600, 600);
+        const QSize m_size = QSize(600, 600);   
 
+        float m_alfa;
+        float m_beta;
         float m_ks;
         float m_kd;
         uint m_m;
         uint m_triNum;
 
+        bool m_fillGrid;
         bool m_showGrid;
         bool m_isInCPView;
         bool m_isPlaying;
+        bool m_gridType;
 
         QVector3D m_lightColor;
         QVector3D m_backColor;

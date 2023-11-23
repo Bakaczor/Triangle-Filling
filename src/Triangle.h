@@ -27,12 +27,14 @@ class Triangle
         * \brief Calculates the normal versors and Z values of the triangle
         * \param controlPoints A list of ControlPoint objects representing the control points of the triangle
         */
-        void calculateNormalVersorsAndZ(const QList<ControlPoint>& controlPoints);
+
+        // added bool for functional grid
+        void calculateNormalVersorsAndZ(const QList<ControlPoint>& controlPoints, bool curveType);
          /*!
         * \brief Paints the outline of the triangle on an image
         * \param image A shared pointer to a QImage object representing the image
         */
-        void paint(QSharedPointer<QImage> image) const;
+        void paint(QSharedPointer<QImage> image, const float& alfa = 0, const float& beta = 0) const;
         /*!
         * \brief Fills the triangle with color
         * \param image A shared pointer to a QImage object representing the image

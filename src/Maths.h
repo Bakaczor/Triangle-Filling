@@ -44,3 +44,6 @@ float B3(const int &i, const float &t);
  * \return The value of the derivative of the B-spline basis function of degree 3
  */
 float dB3(const int &i, const float &t);
+
+// new functionality
+QPoint rotate(const QVector4D &coordinate, const int& width, const int& heigth, const float& alfa, const float& beta);
