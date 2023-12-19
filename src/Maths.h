@@ -45,5 +45,6 @@ float B3(const int &i, const float &t);
  */
 float dB3(const int &i, const float &t);
 
-// new functionality
-QPoint rotate(const QVector4D &coordinate, const int& width, const int& heigth, const float& alfa, const float& beta);
+QPoint rotate(const QVector4D &coordinate, const float& width, const float& heigth, const float& alfa, const float& beta);
+
+void wrapPoint(QPoint& p, const int& width, const int& height);

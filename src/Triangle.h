@@ -44,12 +44,16 @@ class Triangle
 
     private:
         QColor m_color;
-        float m_width;
-        float m_height;
         /*!
         * \brief Approximates the normal versor and Z value at a given coordinate
         * \param coordinate A QVector2D object representing the coordinate
         * \return A QPair object containing the approximated normal versor and coordinnate with approximated Z value
         */
         QPair<QVector3D, QVector3D> approxN_Z(const QVector2D& coordinate) const;
+        /*!
+         * \brief Approximates the Z value at a given coordinate
+         * \param coordinate A QVector2D object representing the coordinate
+         * \return A float representing just the approximated Z value
+         */
+        float approx_Z(const QVector2D& coordinate) const;
 };

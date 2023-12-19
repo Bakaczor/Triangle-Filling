@@ -1,7 +1,7 @@
 #include "SceneManager.h"
 
 SceneManager::SceneManager(QObject* parent, QApplication* app) : QObject(parent), selectedIdx(-1), m_alfa(0), m_beta(0), m_ks(0.5), m_kd(0.5),
-    m_m(50), m_triNum(7), m_fillGrid(true), m_showGrid(false), m_isInCPView(false), m_isPlaying(false), m_gridType(true),
+    m_m(50), m_triNum(7), m_fillGrid(false), m_showGrid(true), m_isInCPView(false), m_isPlaying(false), m_gridType(true),
     m_lightColor(1, 1, 1), m_backColor(1, 1, 1), m_lightCoordinate(), m_app(app),
     m_colors(m_size.width() * m_size.height()), m_useBackColor(true), m_texture(m_size.width() * m_size.height()), m_useTexture(false)
 {
@@ -41,6 +41,7 @@ SceneManager::SceneManager(QObject* parent, QApplication* app) : QObject(parent)
 
     triangles = QList<Triangle>();
     calculateGrid();
+    paint();
 }
 
 void SceneManager::calculateGrid()
@@ -72,7 +73,6 @@ void SceneManager::paint()
     }
     else
     {
-        // new functionality
         if (m_fillGrid) {
             Lambert params(m_size.width(), &m_ks, &m_kd, &m_m, &m_lightColor, &m_backColor, &m_alfa, &m_beta,
                            m_isPlaying ? m_lightCoordinate.next() : m_lightCoordinate.current(), &m_colors, m_useBackColor, &m_texture, m_useTexture);

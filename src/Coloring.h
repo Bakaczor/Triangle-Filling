@@ -10,17 +10,22 @@
 struct Lambert
 {
     int width;
+
     const float* ks;
     const float* kd;
     const uint* m;
+
     const QVector3D* lightColor;
     const QVector3D* backColor;
+
     QVector3D lightCoordinate;
+
     const std::vector<QVector3D>* colors;
     bool useBackColor;
+
     const std::vector<QVector3D>* texture;
     bool useTexture;
-    // new functionality
+
     const float* alfa;
     const float* beta;
 

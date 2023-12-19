@@ -11,6 +11,7 @@ ApplicationWindow {
     maximumHeight: 600
     title: "Triangle Filling"
 
+    readonly property int degree: 90
 
     Connections {
         target: SceneManager
@@ -36,7 +37,6 @@ ApplicationWindow {
             anchors.fill: parent
             anchors.margins: 5
             spacing: 5
-
 
             Image {
                 id: image
@@ -65,7 +65,6 @@ ApplicationWindow {
                 }
             }
 
-
             Rectangle {
                 width: 195
                 height: parent.height
@@ -74,8 +73,10 @@ ApplicationWindow {
                 Column {
                     padding: 7
                     spacing: 15
+
                     Column {
                         focus: false
+                        spacing: 5
                         Label {
                             text: "Control points management:"
                         }
@@ -84,6 +85,7 @@ ApplicationWindow {
                             CheckBox {
                                 id: cpCheckBox
                                 text: "show"
+                                implicitHeight: 30
                                 onClicked: {
                                     SceneManager.setIsInCPView (cpCheckBox.checked)
                                 }
@@ -91,6 +93,7 @@ ApplicationWindow {
                             Slider {
                                 id: cpSlider
                                 implicitWidth: 100
+                                implicitHeight: 30
                                 from: 0
                                 value: 0
                                 to: 1
@@ -105,14 +108,17 @@ ApplicationWindow {
                             }
                         }
                     }
+
                     Column {
                         focus: false
+                        spacing: 5
                         Label {
                             text: "Triangulation:"
                         }
                         Slider {
                             id: triNumSlider
                             implicitWidth: 150
+                            implicitHeight: 30
                             from: 2
                             value: 7
                             to: 15
@@ -125,24 +131,25 @@ ApplicationWindow {
                         }
                         Row {
                             CheckBox {
-                                id: triNumCheckBox
+                                id: showCheckBox
                                 text: "show grid"
-                                height: 10
+                                implicitHeight: 30
+                                checked: true
                                 onClicked: {
-                                    SceneManager.setShowGrid(triNumCheckBox.checked)
+                                    SceneManager.setShowGrid(showCheckBox.checked)
                                 }
                             }
                             CheckBox {
                                 id: fillCheckBox
                                 text: "fill grid"
-                                checked: true
-                                height: 10
+                                implicitHeight: 30
                                 onClicked: {
                                     SceneManager.setFillGrid(fillCheckBox.checked)
                                 }
                             }
                         }
                     }
+
                     Row {
                         focus: false
                         spacing: 5
@@ -167,6 +174,7 @@ ApplicationWindow {
                             }
                         }
                     }
+
                     Row {
                         focus: false
                         spacing: 5
@@ -223,14 +231,14 @@ ApplicationWindow {
                         RadioButton {
                             text: "Bezier"
                             checked: true
-                            height: 10
+                            implicitHeight: 30
                             onClicked: {
                                 SceneManager.changeGridType()
                             }
                         }
                         RadioButton {
                             text: "Functional"
-                            height: 10
+                            implicitHeight: 30
                             onClicked: {
                                 SceneManager.changeGridType()
                             }
@@ -238,6 +246,7 @@ ApplicationWindow {
                     }
                     Column {
                         focus: false
+                        spacing: 5
                         Label {
                             text: "Parameters:"
                         }
@@ -246,11 +255,12 @@ ApplicationWindow {
                             rows: 5
                             Label {
                                 text: "kd:"
-                                y: parent.y - 10
+                                y: parent.y - 15
                             }
                             Slider {
                                 id: kdSlider
                                 implicitWidth: 150
+                                implicitHeight: 30
                                 from: 0
                                 value: 0.5
                                 to: 1
@@ -263,11 +273,12 @@ ApplicationWindow {
                             }
                             Label {
                                 text: "ks:"
-                                y: parent.y + 35
+                                y: parent.y + 15
                             }
                             Slider {
                                 id: ksSlider
                                 implicitWidth: 150
+                                implicitHeight: 30
                                 from: 0
                                 value: 0.5
                                 to: 1
@@ -280,11 +291,12 @@ ApplicationWindow {
                             }
                             Label {
                                 text: "m:"
-                                y: parent.y + 75
+                                y: parent.y + 45
                             }
                             Slider {
                                 id: mSlider
                                 implicitWidth: 150
+                                implicitHeight: 30
                                 from: 1
                                 value: 50
                                 to: 100
@@ -297,15 +309,16 @@ ApplicationWindow {
                             }
                             Label {
                                 text: "alfa:"
-                                y: parent.y + 115
+                                y: parent.y + 75
                             }
                             Slider {
                                 id: alfaSlider
                                 implicitWidth: 150
-                                from: 0
+                                implicitHeight: 30
+                                from: -degree
                                 value: 0
-                                to: 1
-                                stepSize: 0.01
+                                to: degree
+                                stepSize: 1
                                 snapMode: Slider.SnapAlways
                                 focusPolicy: Qt.NoFocus
                                 onMoved: {
@@ -314,15 +327,16 @@ ApplicationWindow {
                             }
                             Label {
                                 text: "beta:"
-                                y: parent.y + 155
+                                y: parent.y + 105
                             }
                             Slider {
                                 id: betaSlider
                                 implicitWidth: 150
-                                from: 0
+                                implicitHeight: 30
+                                from: -degree
                                 value: 0
-                                to: 1
-                                stepSize: 0.01
+                                to: degree
+                                stepSize: 1
                                 snapMode: Slider.SnapAlways
                                 focusPolicy: Qt.NoFocus
                                 onMoved: {
@@ -331,6 +345,7 @@ ApplicationWindow {
                             }
                         }
                     }
+
                     Column {
                         focus: false
                         spacing: 5

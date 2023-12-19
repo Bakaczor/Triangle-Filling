@@ -3,19 +3,21 @@
 #include "Edge.h"
 #include <math.h>
 
-Triangle::Triangle(QList<QPoint> positions, QSize size) : positions(positions), m_color(0, 0, 255),
-    m_width(size.width()), m_height(size.height())
+Triangle::Triangle(QList<QPoint> positions, QSize size) : positions(positions), m_color(0, 0, 255)
 {
+    const float width = size.width();
+    const float height = size.height();
     coordinates = {
-        QVector3D(positions.at(0).x() / m_width, positions.at(0).y() / m_height, 0),
-        QVector3D(positions.at(1).x() / m_width, positions.at(1).y() / m_height, 0),
-        QVector3D(positions.at(2).x() / m_width, positions.at(2).y() / m_height, 0)
+        QVector3D(positions.at(0).x() / width, positions.at(0).y() / height, 0),
+        QVector3D(positions.at(1).x() / width, positions.at(1).y() / height, 0),
+        QVector3D(positions.at(2).x() / width, positions.at(2).y() / height, 0)
     };
     normalVersors = QList<QVector3D>(3);
 }
 
 void Triangle::calculateNormalVersorsAndZ(const QList<ControlPoint>& controlPoints, bool curveType)
 {
+    // Bezier plane
     if (curveType)
     {
         QtConcurrent::map(coordinates, [this, &controlPoints](QVector3D& cor) {
@@ -46,9 +48,9 @@ void Triangle::calculateNormalVersorsAndZ(const QList<ControlPoint>& controlPoin
             coordinates[k].setZ(Z);
         });
     }
+    // cosine plane
     else
     {
-        // new functionality
         QtConcurrent::map(coordinates, [this](QVector3D& cor) {
             std::ptrdiff_t k = std::distance(&coordinates[0], &cor);
             const double pi_2 = M_PI / 2;
@@ -67,22 +69,22 @@ void Triangle::paint(QSharedPointer<QImage> image, const float& alfa, const floa
     pen.setWidth(1);
     painter.setPen(pen);
 
-    if (alfa ==0 && beta == 0)
+    const float width = image->width();
+    const float height = image->height();
+    const float mean = (width + height) / 2;
+
+    if (alfa == 0 && beta == 0)
     {
         painter.drawPolygon(positions);
     }
     else
     {
-        // new functionality
         QList<QPoint> rotated;
         for (const QPoint& p : positions)
         {
-            QPoint rt = rotate(QVector4D(p.x(), p.y(), 300, 1), m_width, m_height, alfa, beta);
-
-            if (rt.x() > 0 && rt.y() > 0 && rt.x() < m_width && rt.y() < m_height)
-            {
-                rotated.append(rt);
-            }
+            float Z = approx_Z(QVector2D(p.x() / width, p.y() / height));
+            QPoint rt = rotate(QVector4D(p.x(), p.y(), Z * mean, 1), width, height, alfa, beta);
+            rotated.append(rt);
         }
         painter.drawPolygon(rotated);
     }
@@ -90,6 +92,10 @@ void Triangle::paint(QSharedPointer<QImage> image, const float& alfa, const floa
 
 void Triangle::fill(QSharedPointer<QImage> image, const Lambert& params) const
 {
+    const float width = image->width();
+    const float height = image->height();
+    const float mean = (width + height) / 2;
+
     // prepare edges
     QList<Edge> edges;
     // polygon has at least 2 non-horizontal edges
@@ -157,19 +163,15 @@ void Triangle::fill(QSharedPointer<QImage> image, const Lambert& params) const
 
             while (xstart <= xend)
             {
-                QPair<QVector3D, QVector3D> N_Z = approxN_Z(QVector2D(static_cast<float>(xstart) / m_width, static_cast<float>(ystart) / m_height));
+                QPair<QVector3D, QVector3D> N_Z = approxN_Z(QVector2D(xstart / width, ystart / height));
                 if (*params.alfa == 0 && *params.beta == 0)
                 {
                     colorPixel(image, QPoint(xstart, ystart), N_Z.second, N_Z.first, params);
                 }
                 else
                 {
-                    // new functionality
-                    QPoint rotated = rotate(QVector4D(xstart, ystart, 300, 1), m_width, m_height, *params.alfa, *params.beta);
-                    if (rotated.x() > 0 && rotated.y() > 0 && rotated.x() < m_width && rotated.y() < m_height)
-                    {
-                        colorPixel(image, rotated, N_Z.second, N_Z.first, params);
-                    }
+                    QPoint rotated = rotate(QVector4D(xstart, ystart, N_Z.second.z() * mean, 1), width, height, *params.alfa, *params.beta);
+                    colorPixel(image, rotated, N_Z.second, N_Z.first, params);
                 }
                 xstart++;
             }
@@ -197,9 +199,22 @@ QPair<QVector3D, QVector3D> Triangle::approxN_Z(const QVector2D& coordinate) con
     const float P0 = parallelogramArea(vec1.x(), vec1.y(), vec2.x(), vec2.y());
     const float P1 = parallelogramArea(vec0.x(), vec0.y(), vec2.x(), vec2.y());
     const float P2 = parallelogramArea(vec0.x(), vec0.y(), vec1.x(), vec1.y());
-
     const float P = P0 + P1 + P2;
+
     const QVector3D N = (P0 * normalVersors.at(0) + P1 * normalVersors.at(1) + P2 * normalVersors.at(2)) / P;
     const float Z = (P0 * coordinates.at(0).z() + P1 * coordinates.at(1).z() + P2 * coordinates.at(2).z()) / P;
     return qMakePair(N.normalized(), QVector3D(coordinate, Z));
+}
+
+float Triangle::approx_Z(const QVector2D& coordinate) const
+{
+    const QVector2D vec0 = QVector2D(coordinates.at(0)) - coordinate;
+    const QVector2D vec1 = QVector2D(coordinates.at(1)) - coordinate;
+    const QVector2D vec2 = QVector2D(coordinates.at(2)) - coordinate;
+    const float P0 = parallelogramArea(vec1.x(), vec1.y(), vec2.x(), vec2.y());
+    const float P1 = parallelogramArea(vec0.x(), vec0.y(), vec2.x(), vec2.y());
+    const float P2 = parallelogramArea(vec0.x(), vec0.y(), vec1.x(), vec1.y());
+    const float P = P0 + P1 + P2;
+
+    return (P0 * coordinates.at(0).z() + P1 * coordinates.at(1).z() + P2 * coordinates.at(2).z()) / P;
 }
