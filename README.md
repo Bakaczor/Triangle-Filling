@@ -1,7 +1,7 @@
 # Triangle Filling
 Triangle Filling is an application that allows rendering an animation of a light source moving over a Bezier surface, with options to change the background and textures. The program is built on Qt 6.6.0, using the C++20 standard.
 
-# Keybindings
+# Controls
 This section contains information on how to use the application.
 
 ## Display Modes
