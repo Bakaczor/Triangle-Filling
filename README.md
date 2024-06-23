@@ -23,3 +23,6 @@ Other settings can be changed during the animation:
 - diffuse reflection coefficient - `kd` slider
 - specular reflection coefficient - `ks` slider
 - shininess coefficient - `m` slider
+
+---
+*Copyright © 2024 Bartosz Kaczorowski*
