@@ -25,4 +25,4 @@ Other settings can be changed during the animation:
 - shininess coefficient - `m` slider
 
 ---
-*Copyright © 2024 Bartosz Kaczorowski*
+*Copyright © 2023 Bartosz Kaczorowski*
